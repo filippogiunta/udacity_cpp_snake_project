@@ -5,7 +5,9 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
-
+#include <thread>
+#include <future>
+#include <mutex>
 
 int main() {
   constexpr std::size_t kFramesPerSecond{60};
@@ -30,8 +32,7 @@ int main() {
   game.UpdateStartSpeed();
   game.Run(controller, renderer, kMsPerFrame);
   std::cout << "Game has terminated successfully!\n";
-  std::cout << "Score: " << game.GetScore() << "\n";
-  std::cout << "Size: " << game.GetSize() << "\n";
+
 
   // Get current time
   auto now = std::chrono::system_clock::now();
@@ -43,6 +44,20 @@ int main() {
 
   // Use formatted time string in filename
   std::string filename = ss.str() + "_score.txt";
-  game.score.SaveToFile(filename, user_name);
+  std::mutex mtx;
+  std::promise<bool> savePromise;
+  std::future<bool> saveFuture = savePromise.get_future();
+
+  std::thread saveThread([&](std::promise<bool>& savePromise) {
+      std::lock_guard<std::mutex> lock(mtx);
+      game.score.SaveToFile(filename, user_name);
+      savePromise.set_value(true);
+  }, std::ref(savePromise));
+
+  saveThread.join();
+
+  bool wasSaved = saveFuture.get();
+  std::cout << "Score: " << game.GetScore() << "\n";
+  std::cout << "Size: " << game.GetSize() << "\n";
   return 0;
 }
