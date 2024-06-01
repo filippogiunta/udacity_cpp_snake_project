@@ -42,11 +42,12 @@ This is a summary of the high level of the structure of the project:<br><br>
 
 ## Addressed point in Rubric
 - A README with instructions is included with the project
+
 - The README indicates the new features you added to the game.
+
 - The README includes information about each rubric point addressed.
-<br><br>
+
 - The submission must compile and run without errors on the Udacity project workspace.
-<br><br>
 
 - The project demonstrates an understanding of C++ functions and control structures: The project effectively utilizes various C++ functions and control structures, demonstrating a solid understanding and application of these fundamental programming concepts.
 
