@@ -75,6 +75,10 @@ This is a summary of the high level of the structure of the project:<br><br>
 
 - The project uses smart pointers instead of raw pointers: `snake` is now handled by using shared pointer in the `Game` class.
 
+- The project uses multithreading: Saving the score in a file uses a thread
+
+- A promise and future is used in the project, A mutex or lock is used in the project : Although it is over-killing the mentioned features are used when saving the score.
+
 ## CC Attribution-ShareAlike 4.0 International
 
 
