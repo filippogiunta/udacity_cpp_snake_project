@@ -101,15 +101,7 @@ void Game::PlaceBadFood() {
   }
 }
 
-void Snake::ShrinkBody() {
-  if (size > 1) {  // Decrease the size of the snake by 1
-    body.pop_back();
-    size--;
-  } else {
-    // But if the snake is only the head, it dies :()
-    alive = false; 
-  }
-}
+
 void Game::Update() {
   if (!snake->alive) return;
 
@@ -139,6 +131,48 @@ void Game::Update() {
     // If the snake eats bad food when only the head is left, the snake dies
     snake->ShrinkBody();
     PlaceBadFood();
+  }
+}
+
+void Game::BadFoodTimer() {
+  // Define the duration for which the bad food is active
+  const int badSeconds = 5;
+
+  // Get the current time
+  auto startTime = std::chrono::high_resolution_clock::now();
+
+  // Lock the mutex
+  std::unique_lock<std::mutex> lock(mutex);
+
+  // While the bad food is active
+  while (is_bad_food_active) {
+    // Unlock the mutex
+    lock.unlock();
+
+    // Get the current time
+    auto current_Time = std::chrono::high_resolution_clock::now();
+
+    // Calculate the elapsed time in seconds
+    auto elapsed_Seconds = std::chrono::duration_cast<std::chrono::seconds>(current_Time - startTime).count();
+
+    // If the elapsed time is greater than or equal to the bad food duration
+    if (elapsed_Seconds >= badSeconds) {
+      // Set the bad food as inactive
+      is_bad_food_active = false;
+
+      // Move the bad food off the grid
+      bad_food.x = 1;
+      bad_food.y = 1;
+
+      // Break the loop
+      break;
+    }
+
+    // Lock the mutex
+    lock.lock();
+
+    // Wait for 800 milliseconds or until the condition_variable is notified
+    conditon_var.wait_for(lock, std::chrono::milliseconds(800));
   }
 }
 
