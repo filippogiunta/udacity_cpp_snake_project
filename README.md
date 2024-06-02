@@ -75,9 +75,7 @@ This is a summary of the high level of the structure of the project:<br><br>
 
 - The project uses smart pointers instead of raw pointers: `snake` is now handled by using shared pointer in the `Game` class.
 
-- The project uses multithreading: Saving the score in a file uses a thread
-
-- A promise and future is used in the project, A mutex or lock is used in the project : Although it is over-killing the mentioned features are used when saving the score.
+- The project uses multithreading, A mutex or lock is used in the project, A condition variable is used in the project: This is used to place bad food (represented by a red dot). When the snake eats bad food it shortens by 1 unit. If just the head is left and the snake eats the bad food then it dies (the UI behaviour when the snake dies is not ideal and it could be improved. )
 
 ## CC Attribution-ShareAlike 4.0 International
 
