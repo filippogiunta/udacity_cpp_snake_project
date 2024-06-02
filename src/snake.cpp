@@ -94,6 +94,14 @@ void Snake::UpdateBody(SDL_Point &current_head_cell, SDL_Point &prev_head_cell) 
 
 void Snake::GrowBody() { growing = true; }
 
+void Snake::ShrinkBody() {
+  if (size > 1) { // Ensure the snake doesn't disappear completely
+    body.pop_back();
+    size--;
+  } else {
+    alive = false; // Snake dies if it eats bad food when only the head is left
+  }
+}
 // Inefficient method to check if cell is occupied by snake.
 bool Snake::SnakeCell(int x, int y) {
   if (x == static_cast<int>(head_x) && y == static_cast<int>(head_y)) {

@@ -3,6 +3,16 @@
 #include "SDL.h"
 #include <score.h>
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
+SDL_Point bad_food;
+bool is_bad_food_active = false;
+std::thread badFoodThread;
+std::mutex mutex;
+std::condition_variable conditon_var;
+
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(new Snake(grid_width, grid_height)),
@@ -10,7 +20,9 @@ Game::Game(std::size_t grid_width, std::size_t grid_height)
       random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
   PlaceFood();
+  PlaceBadFood();
 }
+
 
 void Game::Run(Controller const &controller, Renderer &renderer,
                std::size_t target_frame_duration) {
@@ -27,7 +39,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, *snake.get());
     Update();
-    renderer.Render(*snake.get(), food);
+    renderer.Render(*snake.get(), food, bad_food);
 
     frame_end = SDL_GetTicks();
 
@@ -74,6 +86,30 @@ void Game::PlaceFood() {
   }
 }
 
+void Game::PlaceBadFood() {
+  int x, y;
+  while (true) {
+    x = random_w(engine);
+    y = random_h(engine);
+    // Check that the location is not occupied by a snake item before placing
+    // bad food.
+    if (!snake->SnakeCell(x, y)) {
+      bad_food.x = x;
+      bad_food.y = y;
+      return;
+    }
+  }
+}
+
+void Snake::ShrinkBody() {
+  if (size > 1) {  // Decrease the size of the snake by 1
+    body.pop_back();
+    size--;
+  } else {
+    // But if the snake is only the head, it dies :()
+    alive = false; 
+  }
+}
 void Game::Update() {
   if (!snake->alive) return;
 
@@ -89,6 +125,20 @@ void Game::Update() {
     // Grow snake and increase speed.
     snake->GrowBody();
     snake->speed += 0.02;
+  }
+
+  // Check if there's bad food over here
+  if (bad_food.x == new_x && bad_food.y == new_y) {
+    if (!is_bad_food_active) { // Check if bad food is already active
+      is_bad_food_active = true;
+      badFoodThread = std::thread(&Game::BadFoodTimer, this);
+      badFoodThread.detach();
+    }
+    // Shrink snake and reposition the bad food after it's eaten
+    // Notice that the snake will shorten as bad food is eaten and the bad food will reappear in a new location
+    // If the snake eats bad food when only the head is left, the snake dies
+    snake->ShrinkBody();
+    PlaceBadFood();
   }
 }
 

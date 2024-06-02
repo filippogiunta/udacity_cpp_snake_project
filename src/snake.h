@@ -19,7 +19,7 @@ class Snake {
   void SetStartingSpeed();
   void GrowBody();
   bool SnakeCell(int x, int y);
-
+  void ShrinkBody();
   Direction direction = Direction::kUp;
 
   float speed{0.1f};

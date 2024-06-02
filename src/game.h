@@ -23,12 +23,15 @@ class Game {
 
   std::shared_ptr<Snake> snake;
   SDL_Point food;
+  SDL_Point bad_food;
   std::random_device dev;
   std::mt19937 engine;
   std::uniform_int_distribution<int> random_w;
   std::uniform_int_distribution<int> random_h;
 
   void PlaceFood();
+  void PlaceBadFood();
+  void BadFoodTimer();
   void Update();
 };
 
